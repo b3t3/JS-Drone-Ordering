@@ -73,6 +73,12 @@ const typesOfDrones = [
   new Drones(2000, 5, "Type Three"),
 ];
 
+const fs = require('fs');
+
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 // Function to simulate drone delivery for a single order
 function deliverOrder(order, droneType, customer) {
   return new Promise((resolve) => {
@@ -145,27 +151,37 @@ function calculateTotalDronesUsed(orders, drones) {
   }, 0);
 }
 
-// Main function to run the simulation
-async function runSimulation(playbackSpeed, outputEnabled) {
+//function to run the program
+async function runProgram(playbackSpeed, outputEnabled, simulationDuration) {
   const startTimestamp = Date.now();
 
   const totalDronesUsed = calculateTotalDronesUsed(custOrders, typesOfDrones);
   console.log(`Total drones used: ${totalDronesUsed}`);
 
-  const result = await deliverAllOrders(custOrders, typesOfDrones, playbackSpeed, outputEnabled);
+  let elapsedSimulationTime = 0;
 
-  const endTimestamp = Date.now();
-  const elapsedMilliseconds = (endTimestamp - startTimestamp) / playbackSpeed;
+  while (elapsedSimulationTime < simulationDuration) {
+    const result = await deliverAllOrders(custOrders, typesOfDrones, playbackSpeed, outputEnabled);
 
-  console.log(`Total delivery time: ${result.totalDeliveryTime} minutes`);
-  console.log(`Total consumption: ${result.totalConsumption} kW`);
+    const endTimestamp = Date.now();
+    const elapsedMilliseconds = (endTimestamp - startTimestamp) / playbackSpeed;
+    const averageDeliveryTime = result.totalDeliveryTime / custOrders.length;
 
-  if (outputEnabled) {
-    console.log(`Simulation took ${elapsedMilliseconds} milliseconds.`);
+    console.log(`Total delivery time: ${result.totalDeliveryTime} minutes`);
+    console.log(`Total consumption: ${result.totalConsumption} kW`);
+    console.log(`Average time per order: ${averageDeliveryTime.toFixed(2)} minutes`);
+
+    if (outputEnabled) {
+      console.log(`Simulation took ${elapsedMilliseconds} milliseconds.`);
+    }
+
+    elapsedSimulationTime += elapsedMilliseconds;
+    await sleep(1000 / playbackSpeed);
   }
 }
+const playbackSpeed = 1; 
+const outputEnabled = true; 
+const simulationDuration = 2 * 60 * 1000; 
+runProgram(playbackSpeed, outputEnabled, simulationDuration)
 
-// Example usage for Task A), B), and C)
-const playbackSpeed = 10; // 10x speed
-const outputEnabled = true; // Enable output
-runSimulation(playbackSpeed, outputEnabled);
+//i coulnt make e)
